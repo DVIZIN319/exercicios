@@ -1,5 +1,7 @@
 #include <stdio.h>  
 #include <stdlib.h>
+#include <stdbool.h>
+#include <locale.h>
 
 #define max 50
 #define inv -1
@@ -7,7 +9,18 @@
 typedef int Tipo_chave;
 
 typedef struct{
+    char nome_disc[40];
+}Disciplina;
+ 
+
+typedef struct{
+    char nome[30];
+    Disciplina D;
+}Aluno;
+
+typedef struct{
     Tipo_chave chave;
+    Aluno a;
 }Registro;
 
 typedef struct{
@@ -20,6 +33,7 @@ typedef struct {
     int inicio;
     int disponivel;
 }Lista;
+
 
 void inicializar_Lista(Lista *L){
     int i;
@@ -79,13 +93,16 @@ bool Inserir_elemento_ordenado(Lista *L, Registro r){
 
     }
     else{
-        L->V[i].proximo
+        L->V[i].proximo=L->V[anterior].proximo;
+        L->V[anterior].proximo=i;
     }
 }
 
 int Obtencao_do_NO(Lista *L){
     int resultado= L->disponivel;
-    if(L->disponivel)
+    if(L->disponivel!=inv)
+        L->disponivel=L->V[L->disponivel].proximo;
+    return resultado;
 }
 
 bool Excluir_elemento_lista(Lista *L, Tipo_chave ch){
@@ -101,7 +118,8 @@ bool Excluir_elemento_lista(Lista *L, Tipo_chave ch){
         L->inicio=L->V[i].proximo;
     else
         L->V[anterior].proximo=L->V[i].proximo;
-    Devolver_No_para_lista
+    Devolver_No_para_lista(L,i);
+    return true;
     
 }
 
@@ -112,3 +130,60 @@ void Devolver_No_para_lista(Lista *L, int i){
 void reincializar_lista(Lista *L){
     inicializar_Lista(L);
 }
+
+int main(){
+    setlocale(LC_ALL,"");
+    Lista L;
+    char sair;
+    int opcao = 0;
+   // Tipo_Aluno h;
+    Registro reg;
+
+    inicializar_Lista(&L);
+    do{
+        printf("1-Criar lista de alunos: \n");
+        printf("2- Inserir Aluno na lista: \n");
+        printf("3- Imprimir a lista: \n");
+        
+        printf("Digite a opcao: \n");
+        scanf("%d",&opcao);
+        printf("\n==================================\n");
+        
+        switch(opcao){
+            case 1:
+                   inicializar_Lista(&L);
+                   break;
+            case 2:
+                    printf("Digite a matricula do aluno: ");
+                    scanf("%d",&reg.chave);
+                    Inserir_elemento_ordenado(&L,reg);
+                    break;
+
+
+            case 3:
+                    Imprimir_Lista(&L);
+                    break;
+            
+            case 5:
+                    printf("Digite o nome do aluno: ");
+                    scanf("%s",reg.a.nome);
+                    printf("Digite a matricula do aluno: ");
+                    scanf("%d",&reg.chave);
+                    Inserir_elemento_ordenado(&L,reg);
+                    break;
+            case 6:
+                    printf("Digite a matricula do aluno que deseja excluir: ");
+                    scanf("%d",&reg.chave);
+                    Excluir_elemento_lista(&L,reg.chave);
+        
+        }
+        printf("\n\n==================================\n\n");
+        fflush(stdin);
+        printf("Deseja sair do programa (s/n): \n");
+        scanf("%c",&sair);
+        printf("\n\n==================================\n\n");
+    }while(sair!='s');
+    return 0;
+}
+
+    
