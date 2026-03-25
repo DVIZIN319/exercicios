@@ -36,7 +36,8 @@ typedef struct{
 
 
 void inicializar_Lista(Lista *L){
-       L->inicio=NULL;
+    L->inicio = NULL;
+    
 }
 
 int Numero_Elementos(Lista *L){
@@ -51,80 +52,86 @@ int Numero_Elementos(Lista *L){
 }
 
 void Imprimir_Lista(Lista *L){
-    int p=L->info;
+    POINT aux=L->inicio;
     printf("\t Lista \n");
-    while (p != NULL){
-        printf(" %d " , L->link.r.chave);
-        i=L->V[i].proximo;
+    while (aux != NULL){
+        printf("%s %d " , aux->r.a.nome,aux->r.chave);
+        aux = aux->proximo;
     }
     printf("\n\n");
 }
 
 int Busca_sequencial_ordenada(Lista *L, Tipo_chave ch){
-    int i=L->inicio;
-    while (i!=inv && L->V[i].r.chave<ch)
-        i=L->V[i].proximo;
-    if (i!=inv && L->V[i].r.chave==ch)
-        return i;
-    else return inv;
+    POINT pos = L->inicio;
+    while (pos != NULL)
+    if (pos->r.chave==ch)
+        return pos;
+    pos = pos->proximo;
+}
+
+POINT Busca_Sequencial_Aux(Lista *L, Tipo_chave ch, POINT *anterior){
+    *anterior=NULL;
+    POINT atual=L->inicio;
+    while((atual!=NULL)&&(atual->r.chave == ch)){
+        *anterior=atual;
+        atual=atual->proximo;
+    }
+    if((atual!=NULL)&&(atual->r.chave==ch))
+        return atual;
+    return NULL;
 }
 
 bool Inserir_elemento_ordenado(Lista *L, Registro r){
-    if(L->disponivel==inv)
-        return false;
-    int anterior=inv;
-    int i=L->inicio;
     Tipo_chave ch=r.chave;
-    while (i!=inv && L->V[i].r.chave<ch)
-    {
-        anterior=i;
-        i=L->V[i].proximo;
-    }
-    if(i!=inv && L->V[i].r.chave==ch)
+    POINT anterior , i;
+    i = Busca_Sequencial_Aux(L,ch,&anterior);
+    if(i!=NULL)
         return false;
-    i=Obtencao_do_NO(L);
-    L->V[i].r=r;
-    if (anterior==inv){
-        L->V[i].proximo=L->inicio;
-
+    i=(POINT)malloc(sizeof(Elemento));
+    i->r=r;
+    if (anterior==NULL){
+        i->proximo=L->inicio;
+        L->inicio=i;
     }
     else{
-        L->V[i].proximo=L->V[anterior].proximo;
-        L->V[anterior].proximo=i;
+        i->proximo=anterior->proximo;
+        anterior->proximo=i;
     }
-}
-
-int Obtencao_do_NO(Lista *L){
-    int resultado= L->disponivel;
-    if(L->disponivel!=inv)
-        L->disponivel=L->V[L->disponivel].proximo;
-    return resultado;
-}
-
-bool Excluir_elemento_lista(Lista *L, Tipo_chave ch){
-    int anterior = inv;
-    int i=L->inicio;
-    while (i!=inv && L->V[i].r.chave<ch){
-        anterior=i;
-        i=L->V[i].proximo;
-    }
-    if (anterior == inv || L->V[i].r.chave!=ch)
-        return false;
-    if(anterior==inv)
-        L->inicio=L->V[i].proximo;
-    else
-        L->V[anterior].proximo=L->V[i].proximo;
-    Devolver_No_para_lista(L,i);
-    return true;
     
 }
 
-void Devolver_No_para_lista(Lista *L, int i){
+/*int Obtencao_do_NO(Lista *L){
+    POINT resultado;
+    if(L->disponivel!=inv)
+        L->disponivel=L->V[L->disponivel].proximo;
+    return resultado;
+}*/
+
+bool Excluir_elemento_lista(Lista *L, Tipo_chave ch){
+    POINT anterior, i;
+    i = Busca_Sequencial_Aux(L,ch,&anterior);
+    if(i == NULL)
+        return false;
+    if(anterior == NULL)
+        L->inicio=i->proximo;
+    else
+        anterior->proximo=i->proximo;
+    free(i);
+    return false;
+}
+
+/*void Devolver_No_para_lista(Lista *L, int i){
     L->V[i].proximo=L->disponivel;
     L->disponivel=i;
-}
+}*/
 void reincializar_lista(Lista *L){
-    inicializar_Lista(L);
+    POINT aux=L->inicio;
+    while(aux!=NULL){
+        POINT limpar=aux;
+        aux=aux->proximo;
+        free(limpar);
+    }
+    L->inicio=NULL;
 }
 
 int main(){
@@ -146,30 +153,29 @@ int main(){
         
         switch(opcao){
             case 1:
-                   inicializar_Lista(&L);
-                   break;
+                printf("Lista iniciada !!");
+                inicializar_Lista(&L);
+                break;
             case 2:
-                    printf("Digite a matricula do aluno: ");
-                    scanf("%d",&reg.chave);
-                    Inserir_elemento_ordenado(&L,reg);
+                    do{printf("Digite o nome do aluno: ");
+                    scanf(" %[^\n]s", reg.a.nome);    
+                    printf("Digite a matricula: ");
+                    scanf("%d", &reg.chave);
+    
+                    if (Inserir_elemento_ordenado(&L, reg)) {
+                        printf("Aluno inserido com sucesso!\n");
+                    } else {
+                        printf("Erro: Matrícula ja existe ou falha na insercao.\n");
+                         }
+                         break;
+                    printf("deseja continuar cadastrando? (S/N)");
+                    scanf("%d", &opcao);
+                    }while (opcao != "n");
                     break;
-
-
+                    
             case 3:
                     Imprimir_Lista(&L);
                     break;
-            
-            case 5:
-                    printf("Digite o nome do aluno: ");
-                    scanf("%s",reg.a.nome);
-                    printf("Digite a matricula do aluno: ");
-                    scanf("%d",&reg.chave);
-                    Inserir_elemento_ordenado(&L,reg);
-                    break;
-            case 6:
-                    printf("Digite a matricula do aluno que deseja excluir: ");
-                    scanf("%d",&reg.chave);
-                    Excluir_elemento_lista(&L,reg.chave);
         
         }
         printf("\n\n==================================\n\n");
